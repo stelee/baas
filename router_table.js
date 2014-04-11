@@ -1,6 +1,7 @@
 exports.routers={
 	"/" : "index"
-	,"/hello" : "sample"
-	,"/hello/(\\w*)" : "bonjour"
-	,"/bonjour/(\\w*)" : "bonjour"
+	,"/hello" 			: "sample"
+	,"/hello/(\\w*)" 	: "bonjour"
+	,"/bonjour/(\\w*)" 	: "bonjour"
+	,"/login"			: "login"
 }

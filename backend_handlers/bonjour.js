@@ -5,7 +5,7 @@ var Bonjour=function()
 
 Bonjour.prototype.get=function(greet)
 {
-	this.response.write("hello "+greet);
+	this.response.end("hello "+greet);
 }
 
 exports.getInstance=function(){

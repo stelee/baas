@@ -15,5 +15,9 @@
 	"scripts" :
 	{
 		"prod" : "node server.js --production"
+	},
+	"dependencies" : 
+	{
+		"promise" : ">=4.0.0"
 	}
 }
