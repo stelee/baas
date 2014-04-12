@@ -66,9 +66,16 @@ Dispatcher.prototype.dispatch=function(handler)
 					that.auth(function(passport){
 						console.log("==========================");
 						console.log(passport);
-						if(authMethod.call(handlerImpl,passport)==true)
+						if(passport.status == true)
 						{
-							resolve(passport)
+							if(authMethod.call(handlerImpl,passport)==true)
+							{
+								resolve(passport)
+							}
+							else
+							{
+								reject({status : false, message : "Not enough privilege"})
+							}	
 						}else
 						{
 							reject(passport)

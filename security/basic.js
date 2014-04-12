@@ -1,4 +1,5 @@
 var securityContext=require('./securityContext').context;
+var session=require('../sessioncache').session;
 
 function Basic()
 {
@@ -28,7 +29,8 @@ Basic.prototype.auth=function(authentication,callBack)
 		{
 			passport.status = true;
 			passport.username = username;
-			passport.token = '111111111111111111100000000000000000'
+			passport.groups=user.groups;
+			passport.token = session.login(passport);
 		}else
 		{
 			passport.status = false;

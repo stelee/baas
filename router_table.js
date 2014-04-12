@@ -4,4 +4,5 @@ exports.routers={
 	,"/hello/(\\w*)" 	: "bonjour"
 	,"/bonjour/(\\w*)" 	: "bonjour"
 	,"/login"			: "login"
+	,"/admin"			: "admin"
 }
