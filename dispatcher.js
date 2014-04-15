@@ -1,6 +1,7 @@
 var config = require("./config");
 var loader=require("./loader").loader;
 var Promise=require("promise");
+var session=require('./sessioncache').session;
 
 var Dispatcher=function(){
 	this.response=null;
@@ -95,6 +96,14 @@ Dispatcher.prototype.dispatch=function(handler)
 				reject(passport);
 			}else
 			{
+				if(passport.token)
+				{
+					var sessionContext=session.getData(passport.token);
+					handlerImpl.sessionContext=sessionContext;
+				}
+
+				handlerImpl.passport=passport;
+
 				if(method+"WriteHeader" in handlerImpl){
 					handlerImpl[method+"WriteHeader"]();
 				}else if("writeHeader" in handlerImpl)
@@ -106,6 +115,7 @@ Dispatcher.prototype.dispatch=function(handler)
 						that.response.writeHead(202,{"Content-Type" : "text/json"});
 					}).apply(handlerImpl);
 				}
+				
 				handlerImpl[method].apply(handlerImpl,handler.params);
 			}
 		})

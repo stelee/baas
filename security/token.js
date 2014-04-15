@@ -23,6 +23,8 @@ Token.prototype.auth=function(authentication,callBack)
 	{
 		passport=data.__passport__;
 	}
+	passport.token=authentication; //set the token value to make sure
+
 	callBack(passport);
 }
 exports.getInstance=function()

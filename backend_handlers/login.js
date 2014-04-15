@@ -3,8 +3,7 @@ var Login=function(){
 }
 Login.prototype.auth_get=function(passport)
 {
-	this.passport=passport;
-	return passport.status;
+	return true;
 }
 Login.prototype.get=function()
 {
