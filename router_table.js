@@ -5,4 +5,6 @@ exports.routers={
 	,"/bonjour/(\\w*)" 	: "bonjour"
 	,"/login"			: "login"
 	,"/admin"			: "admin"
+	,"/firstcrab"		: "firstcrab"
+	,"/public/(.*)"		: "public"
 }
