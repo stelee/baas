@@ -3,12 +3,12 @@ var path=require('path'),
 
 var Public=function()
 {
-	this.www_folder=fs.realpathSync('./www/');  
+	this.www_folder=fs.realpathSync('./www');  
 }
 
 Public.prototype.get=function(pathname)
 {
-	var pathname=this.www_folder+pathname;
+	var pathname=this.www_folder+ "/" + pathname;
 	if(path.extname(pathname)=="")
 	{
 		pathname+="/";
@@ -17,7 +17,6 @@ Public.prototype.get=function(pathname)
         pathname+="index.html";
     }
     var res=this.response;
-
     fs.exists(pathname,function(exists){
         if(exists){
             switch(path.extname(pathname)){
