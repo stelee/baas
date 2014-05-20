@@ -1,23 +1,21 @@
 {
-	"name" : "baas",
-	"description" : "Backend As A Service",
-	"version" : "0.0.1",
-	"author" : "Yang Li",
-	"homepage" : "https://github.com/stelee/baas",
-	"repository" : {
-		"type" : "git",
-		"url" : "https://github.com/stelee/baas.git"	
-	},
-	"engines": 
-	{
-	    "node": ">=0.6.0"
-	},
-	"scripts" :
-	{
-		"prod" : "node server.js --production"
-	},
-	"dependencies" : 
-	{
-		"promise" : ">=4.0.0"
-	}
+  "name": "baas",
+  "description": "Backend As A Service",
+  "version": "0.0.1",
+  "author": "Yang Li",
+  "homepage": "https://github.com/stelee/baas",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stelee/baas.git"
+  },
+  "engines": {
+    "node": ">=0.6.0"
+  },
+  "scripts": {
+    "prod": "node server.js --production"
+  },
+  "dependencies": {
+    "promise": ">=4.0.0",
+    "string": "~1.8.1"
+  }
 }

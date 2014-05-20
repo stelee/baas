@@ -1,12 +1,16 @@
-var Bonjour=function()
-{
+var url = require('url'),
+    req = require('request'),
+    S = require('string');
 
+var Firstcrab=function()
+{
 }
 
-Bonjour.prototype.get=function()
+Firstcrab.prototype.get=function(pathname)
 {
 	var that=this;
 	var Crawler = require("crawler").Crawler;
+	var link = S(that.request.url).between('path=', '&').s
 
 	var c = new Crawler({
 	"maxConnections":10,
@@ -14,6 +18,7 @@ Bonjour.prototype.get=function()
 	// This will be called for each crawled page
 	"callback":function(error,result,$) {
 
+	    //var pathname = url.parse(req.url).pathname
 	    // $ is a jQuery instance scoped to the server-side DOM of the page
 	    var title=$("h1").text();
 	    var body=$("#text").text();
@@ -27,9 +32,9 @@ Bonjour.prototype.get=function()
 	});
 
 	// Queue just one URL, with default callback
-	c.queue("http://www.firstcrab.com/life/wen/idea/2013-12-12/406.html");
+	c.queue("http://www.firstcrab.com/"+link);
 }
 
 exports.getInstance=function(){
-	return new Bonjour();
+	return new Firstcrab();
 }
