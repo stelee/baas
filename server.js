@@ -26,6 +26,6 @@ http.createServer(function (req, res) {
         dispatcher.dispatch(handler);
     }
  
-}).listen(config.port, "127.0.0.1");
+}).listen(config.port, "0.0.0.0");
  
 console.log("Server running at http://127.0.0.1:"+config.port+"/");
