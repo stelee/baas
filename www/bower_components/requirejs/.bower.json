@@ -1,0 +1,14 @@
+{
+  "name": "requirejs",
+  "homepage": "https://github.com/stelee/requirejs",
+  "_release": "bf62108d3c",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "bf62108d3cf703f45dfb4584fd4a67a10d0ac970"
+  },
+  "_source": "git://github.com/stelee/requirejs.git",
+  "_target": "*",
+  "_originalSource": "git://github.com/stelee/requirejs",
+  "_direct": true
+}
