@@ -7,19 +7,19 @@ Router.prototype.config=function(app){
 	app.config(['$routeProvider',function($routeProvider){
 		$routeProvider
 			.when('/member',{
-				templateUrl: 'partials/member.html'
+				templateUrl: 'views/member.html'
 				,controller: 'memberCtrl'
 			})
 			.when('/resto',{
-				templateUrl: 'partials/resto.html'
+				templateUrl: 'views/resto.html'
 				,controller: 'restoCtrl'
 			})
 			.when('/location',{
-				templateUrl: 'partials/location.html'
+				templateUrl: 'views/location.html'
 				,controller: 'locationCtrl'
 			})
 			.when('/contact',{
-				templateUrl: 'partials/contact.html'
+				templateUrl: 'views/contact.html'
 				,controller: 'contactCtrl'
 			})
 			.otherwise({
