@@ -1,0 +1,15 @@
+ <div class='flip-container' ng-click='switch()'>
+ 	<div class='flip'>
+	 	<div id="memberCardText" class="front">
+			<h1>Welcome, {{name}}</h1>
+			<p>Card No: {{number | cardNumberFmt}}</p>
+			<button class='btn btn-primary btn-lg'>Press To Pay</button>
+		</div>
+		<div id="memberCardBarCode" class="back">
+			<h1>Scan to pay</h1>
+			<p>Card No: <mp-barcode src='{{number}}'></mp-barcode></p>
+			<button class='btn btn-primary btn-lg'>Press To Return</button>
+		</div>
+	</flip>
+ </div>
+ 

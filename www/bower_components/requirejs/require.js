@@ -124,6 +124,12 @@
 		}
 	}
 	webnpm.require=function(path,contentResolver,callback){
+
+		if(path.match(/\.js$/g)===null)
+		{
+			path += ".js";
+		}
+
 		if(CONFIG_REQUIRE_ONCE&&global.__module_cache__[path])
 		{
 			return global.__module_cache__[path];

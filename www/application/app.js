@@ -3,13 +3,29 @@
 	//global injection
 	//Always to be the first of app.js
 	var app=angular.module('restoApp',['ngRoute'])
+
+	global.appConfig=require('application/configurations/appConfig').config;
 	
-	var router=require('application/configurations/router.js').getInstance();
+	//Register the routers
+	var router=require('application/configurations/router').getInstance();
 	router.config(app);	
 
-	var controllers=require('application/configurations/controller.js').getInstance();
+	//Register the controllers
+	var controllers=require('application/configurations/controller').getInstance();
 	controllers.config(app);
-	var directive=require('application/configurations/directive.js').getInstance();
+
+	//Register the directives
+	var directive=require('application/configurations/directive').getInstance();
 	directive.config(app);
+
+	//Register the custom filters
+	app.filter('cardNumberFmt',function(){
+		return function(input)
+		{
+			return require('libs/utils').fmt(input, 4, " ");
+
+		}
+	})
+
 
 })(this)
