@@ -39,10 +39,19 @@ body {
 /* front pane, placed above back */
 .front {
 	z-index: 2;
+	background: white;
+	padding: 10px;
+	border-radius: 10px; 
 }
 
 /* back, initially hidden pane */
 .back {
 	transform: rotateY(180deg);
 	-webkit-transform: rotateY(180deg);
+}
+
+/*the QR code should be centered**/
+.mpQRCode
+{
+	margin: auto;
 }
