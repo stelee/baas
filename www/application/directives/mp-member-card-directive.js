@@ -5,6 +5,7 @@ module.exports=function(){
 		,scope: {
 			name : "@"
 			,number : "@"
+			,displayName : "@"
 		}
 		,templateUrl: "views/templates/mp-member-card-directive-tmp.html"
 		,link : function(scope)

@@ -3,7 +3,7 @@ exports.context={
 		username : 'stelee'
 		,password : 'test'
 		,groups : [
-			'user'
+			'user','mongo'
 		]
 	},
 	'admin' : {

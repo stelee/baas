@@ -7,4 +7,5 @@ exports.routers={
 	,"/admin"			: "admin"
 	,"/firstcrab"		: "firstcrab"
 	,"/public/(.*)"		: "public"
+	,"/mongodb/(.*)"	: "mongodb_proxy"
 }
