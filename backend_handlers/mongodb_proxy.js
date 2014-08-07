@@ -1,6 +1,11 @@
 var mixin=require('./libs/mixin').mixin;
 var withResponseToJSON=require('./libs/comps/withResponseToJSON');
+var withPostDataReceiver=require('./libs/comps/withPostDataReceiver');
+var withQuery=require('./libs/comps/withQuery');
 var en=require('lingo').en;
+var singleton=require('./libs/singleton');
+var loadModel=require('./libs/model_loader').load;
+var path=require('./libs/utils/path').path;
 
 MSG={
 	"0" : "SUCCESS"
@@ -11,17 +16,22 @@ MSG={
 	,"-7" : "ERROR CONNECT TO THE SERVER"
 	,"-13" : "MODEL IS NOT DEFINED"
 	,"-15" : "ERROR ON INSERT THE DATA"
+	,"-17" : "ERROR ON FIND OR QUERY THE DATA"
+	,"-19" : "QUERY STRING PARSE ERROR"
 }
 
 var MongoDBProxy=function()
 {
-	//Configuration
-	this.hostname='localhost';
-	this.port='27017';
-	this.body ='';
+	this.mongodbManager=singleton.getInstance('mongodbManager',function(){
+			console.log("new obj");
+		return require('./libs/mongodb_manager').getInstance({dbName : 'blog'});
+	});
+	this.mongodbManager.reconnect();
 }
 
 mixin(MongoDBProxy,withResponseToJSON);
+mixin(MongoDBProxy,withPostDataReceiver);
+mixin(MongoDBProxy,withQuery);
 //private
 MongoDBProxy.prototype._getConnectionString=function(dbName)
 {
@@ -44,57 +54,65 @@ MongoDBProxy.prototype._msg=function(code)
 		message : MSG[code]
 	})
 }
+
 MongoDBProxy.prototype._success=function()
 {
 	this._msg("0");
 }
-MongoDBProxy.prototype._insert=function(dbName,collectionName)
+MongoDBProxy.prototype._find=function(modelName,query)
 {
-	if(!!!dbName){
-		this._error("-2");
-		return;
+	var q=path(query,"q");
+	if(q===null)
+	{
+		q={};
+	}else if(typeof q === 'string')
+	{
+		try{
+			q=JSON.parse(q);
+		}catch(e){
+			this._error("-19");
+		}
+		
 	}
+	var Model=loadModel(modelName);
+	if(Model===null)
+	{
+		this._error("-13");
+	}
+	var that=this;
+	var callBack=function(err,models)
+	{
+
+		if(err)
+		{
+			that._error("-17");
+			console.error(err);
+			return;
+		}
+		that.writeToJSON(models);
+	}
+	
+	Model.find(q,callBack);
+}
+MongoDBProxy.prototype._insert=function(collectionName)
+{
 	if(!!!collectionName)
 	{
 		this._error("-3");
 		return;
 	}
 	var that=this;
-	this.request.addListener('data',function(chunk){
-		that.body += chunk;
-	});
-	this.request.addListener("error",function(error){
-		that._error("-5");
-	});
-	this.request.addListener("end",function(chunk){
-		if(chunk)
+	this.receiveData(function(body){
+		if(that.mongodbManager.isConnected())
 		{
-			that.body +=  chunk;
-		}
-		var mongoose = require('mongoose');
-		mongoose.connect(that._getConnectionString(dbName));
-
-		var db=mongoose.connection;
-		db.on('error',function(){
-			that._error("-7");
-		})
-
-		db.once('open',function(){
 			try{
-				var Model=null;
-				var modelName=en.singularize(collectionName);
-				try{
-					Model = require('./models/'+modelName);
-				}catch(e){
-					console.error(e);
-				}
+				var Model=loadModel(collectionName);
 				if(!!!Model)
 				{
 					that._error("-13");
-					db.close();
 					return;
 				}
-				var data=JSON.parse(that.body);
+				var data=JSON.parse(body);
 
 				var obj=new Model(data);
 				console.log(obj);
@@ -114,9 +132,14 @@ MongoDBProxy.prototype._insert=function(dbName,collectionName)
 			{
 				//db.close();
 			}
-		})
-	})
-	//this._success();
+		}
+		else
+		{
+			that._error("-7");
+		}
+	},function(error){
+		that._error("-5");
+	});
 }
 
 //public
@@ -138,13 +161,16 @@ MongoDBProxy.prototype.auth=function(passport)
 MongoDBProxy.prototype.get=function(params)
 {
 	var args=params.split("/");
-	var method=args[0];
+	var modelName=args[0];
 	var args=args.slice(1);
-	if(method === "ping")
+	if(modelName === "ping") //special model Name
 	{
 		//ping service
-		this.ping(args);
+		this.ping();
 		return;
+	}else
+	{
+		this._find(modelName,this.getQuery());
 	}
 }
 
@@ -164,30 +190,19 @@ MongoDBProxy.prototype.delete=function(params)
 MongoDBProxy.prototype.post=function(params)
 {
 	var args=params.split("/");
-	var dbName=args[0];
-	var collectionName=args[1];
-	this._insert(dbName,collectionName)
+	var collectionName=args[0];
+	this._insert(collectionName)
 }
 
 MongoDBProxy.prototype.ping=function(dbName)
 {
-	var that=this;
-	if(!!!dbName)
+	if(this.mongodbManager.isConnected())
 	{
-		this._error("-2")
-		return;
+		this._success();
+	}else
+	{
+		this._error("-7");
 	}
-	var mongoose = require('mongoose');
-	mongoose.connect(this._getConnectionString(dbName));
-
-	var db=mongoose.connection;
-	db.on('error',function(){
-		that._error("-7");
-	})
-
-	db.once('open',function(){
-		that._success();
-	})
 }
 
 
