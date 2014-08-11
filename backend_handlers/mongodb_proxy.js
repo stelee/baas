@@ -59,10 +59,33 @@ MongoDBProxy.prototype._success=function()
 {
 	this._msg("0");
 }
+
+MongoDBProxy.prototype._getById=function(modelName,id)
+{
+	var Model=loadModel(modelName);
+	if(Model===null)
+	{
+		this._error("-13");
+	}
+	var that=this;
+	var callBack=function(err,model)
+	{
+
+		if(err)
+		{
+			that._error("-17");
+			console.error(err);
+			return;
+		}
+		that.writeToJSON(model);
+	}
+	Model.findOne({
+		"_id" : id
+	}).exec(callBack);
+}
+
 MongoDBProxy.prototype._find=function(modelName,query)
 {
-	
-	console.log(query);
 	
 	var Model=loadModel(modelName);
 	if(Model===null)
@@ -160,7 +183,14 @@ MongoDBProxy.prototype.get=function(params)
 		return;
 	}else
 	{
-		this._find(modelName,this.getQuery());
+		if(en.isSingular(modelName))
+		{
+			this._getById(modelName,args[0]);
+		}else
+		{
+			this._find(modelName,this.getQuery());
+	}
+		
 	}
 }
 
@@ -171,7 +201,16 @@ MongoDBProxy.prototype.put=function(params)
 
 MongoDBProxy.prototype.delete=function(params)
 {
-
+	var args=params.split("/");
+	var modelName=args[0];
+	var args=args.slice(1);
+	if(en.isSingular(modelName))
+	{
+		this._deleteById(modelName,args[0]); //delete the single object$TODO
+	}else
+	{
+		this._deleteAll(modelName,this.getQuery()); //delete the objects by a query$TODO
+	}
 }
 
 //insert the data into the database
