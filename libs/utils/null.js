@@ -9,4 +9,14 @@ var isNull=function(obj){
     }
     return false;
 }
+
+var isEmpty=function(obj)
+{
+	if(obj === {})
+	{
+		return true;
+	}
+	return isNull(obj);
+}
 exports.isNull=isNull;
+exports.isEmpty=isEmpty;

@@ -61,19 +61,9 @@ MongoDBProxy.prototype._success=function()
 }
 MongoDBProxy.prototype._find=function(modelName,query)
 {
-	var q=path(query,"q");
-	if(q===null)
-	{
-		q={};
-	}else if(typeof q === 'string')
-	{
-		try{
-			q=JSON.parse(q);
-		}catch(e){
-			this._error("-19");
-		}
-		
-	}
+	
+	console.log(query);
+	
 	var Model=loadModel(modelName);
 	if(Model===null)
 	{
@@ -91,8 +81,8 @@ MongoDBProxy.prototype._find=function(modelName,query)
 		}
 		that.writeToJSON(models);
 	}
-	
-	Model.find(q,callBack);
+	this.mongodbManager.query(Model,query,callBack);
+	//Model.find(q,callBack);
 }
 MongoDBProxy.prototype._insert=function(collectionName)
 {

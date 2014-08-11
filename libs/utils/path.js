@@ -41,6 +41,26 @@ var setValue=function(target, path, value)
 	object[objName]=value;
 	return true;
 }
+var walk=function(obj,decorator)
+{
+	for(prop in obj)
+	{
+		if(!obj.hasOwnProperty(prop))
+		{
+			continue;
+		}
+		if(typeof obj[prop] === "object")
+		{
+			walk(obj[prop]);
+		}else
+		{
+			obj[prop]=decorator(obj[prop]);
+		}
+	}
+}
+
+exports.walk=walk;
+
 exports.path=function(target,path, value)
 {
 	if('undefined' == typeof value)
