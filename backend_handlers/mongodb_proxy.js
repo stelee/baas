@@ -6,19 +6,7 @@ var en=require('lingo').en;
 var singleton=require('./libs/singleton');
 var loadModel=require('./libs/model_loader').load;
 var path=require('./libs/utils/path').path;
-
-MSG={
-	"0" : "SUCCESS"
-	,"-1" : "No METHOD DEFINED"
-	,"-2" : "NO DBNAME IDENTIFIED"
-	,"-3" : "NO COLLECTIONNAME IDENTIFIED"
-	,"-5" : "ERROR ON RECEIVING THE REQUEST"
-	,"-7" : "ERROR CONNECT TO THE SERVER"
-	,"-13" : "MODEL IS NOT DEFINED"
-	,"-15" : "ERROR ON INSERT THE DATA"
-	,"-17" : "ERROR ON FIND OR QUERY THE DATA"
-	,"-19" : "QUERY STRING PARSE ERROR"
-}
+var MSG=require('./libs/errorcode').MSG
 
 var MongoDBProxy=function()
 {
@@ -91,6 +79,7 @@ MongoDBProxy.prototype._find=function(modelName,query)
 	if(Model===null)
 	{
 		this._error("-13");
+		return;
 	}
 	var that=this;
 	var callBack=function(err,models)
@@ -107,6 +96,83 @@ MongoDBProxy.prototype._find=function(modelName,query)
 	this.mongodbManager.query(Model,query,callBack);
 	//Model.find(q,callBack);
 }
+
+MongoDBProxy.prototype._updateById=function(modelName,objectId)
+{
+	var Model=loadModel(modelName);
+	if(Model===null)
+	{
+		this._error("-13");
+		return;
+	}
+	var that=this;
+	this.receiveData(function(body){
+		var data=null;
+		try{
+			data=JSON.parse(body);
+		}catch(error)
+		{
+			that._error("-19");
+			return;
+		}
+		if(!!!objectId)
+		{
+			objectId = data["_id"];//try to find the objectId from the payload
+		}
+		if(!!!objectId)
+		{
+			that._error("-27");
+			return;
+		}
+		Model.findOneAndUpdate({"_id" : objectId},data,function(err,doc){
+			if(err)
+			{
+				that._error("-29");
+				return;
+			}
+			that.writeToJSON(doc);
+		})
+
+	})
+}
+
+MongoDBProxy.prototype._updateAll=function(modelName,query)
+{
+	var Model=loadModel(modelName);
+	if(Model===null)
+	{
+		this._error("-13");
+		return;
+	}
+	var that=this;
+	this.receiveData(function(body){
+		var data=null;
+		try{
+			data=JSON.parse(body);
+		}catch(error)
+		{
+			that._error("-19");
+			return;
+		}
+		that.mongodbManager.update(Model,query,data,function(err,doc){
+			if(err)
+			{
+				that._error("-29");
+				return;
+			}
+			that._success();
+		},function(err){
+			if(err.name === "SyntaxError"){
+				that._error("-19");
+			}else
+			{
+				that._error("-29");
+			}
+		})
+
+	})
+}
+
 MongoDBProxy.prototype._insert=function(collectionName)
 {
 	if(!!!collectionName)
@@ -155,6 +221,47 @@ MongoDBProxy.prototype._insert=function(collectionName)
 	});
 }
 
+MongoDBProxy.prototype._deleteById=function(modelName,objectId)
+{
+	var Model=loadModel(modelName);
+	var that=this;
+	if(Model===null)
+	{
+		this._error("-13");
+		return;
+	}
+	Model.remove({"_id" : objectId},function(error){
+		if(error)
+		{
+			that._error("-23");
+			return;
+		}
+		that._success();
+	})
+}
+
+MongoDBProxy.prototype._deleteAll=function(modelName,query)
+{
+	var Model=loadModel(modelName);
+	if(Model===null)
+	{
+		this._error("-13");
+		return;
+	}
+	var that=this;
+	var callBack=function(err,models)
+	{
+
+		if(err)
+		{
+			that._error("-23");
+			console.error(err);
+			return;
+		}
+		that._success();
+	}
+	this.mongodbManager.delete(Model,query,callBack);
+}
 //public
 
 MongoDBProxy.prototype.auth=function(passport)
@@ -196,7 +303,16 @@ MongoDBProxy.prototype.get=function(params)
 
 MongoDBProxy.prototype.put=function(params)
 {
-
+	var args=params.split("/");
+	var modelName=args[0];
+	var args=args.slice(1);
+	if(en.isSingular(modelName) && args[0]!=null)
+	{
+		this._updateById(modelName,args[0]); 
+	}else
+	{
+		this._updateAll(modelName,this.getQuery());
+	}
 }
 
 MongoDBProxy.prototype.delete=function(params)
@@ -204,7 +320,7 @@ MongoDBProxy.prototype.delete=function(params)
 	var args=params.split("/");
 	var modelName=args[0];
 	var args=args.slice(1);
-	if(en.isSingular(modelName))
+	if(en.isSingular(modelName) && args[0]!=null)
 	{
 		this._deleteById(modelName,args[0]); //delete the single object$TODO
 	}else
