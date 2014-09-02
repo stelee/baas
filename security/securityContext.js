@@ -13,5 +13,13 @@ exports.context={
 			'user'
 			, 'admin'
 		]
+	},
+	'twister' : {
+		username : 'twister'
+		,password: 'changeyourpassword'
+		,groups : [
+			'user'
+			,'twister'
+		]
 	}
 }

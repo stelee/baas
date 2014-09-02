@@ -8,4 +8,5 @@ exports.routers={
 	,"/firstcrab"		: "firstcrab"
 	,"/public/(.*)"		: "public"
 	,"/mongodb/(.*)"	: "mongodb_proxy"
+	,"/twister/" : "proxy"
 }

@@ -16,11 +16,26 @@ Dispatcher.prototype.auth=function(callBack)
 {
 	var headers=this.request.headers;
 	var authorization = headers.authorization;
-	var matches=authorization.match(/^(\w+)\s/);
-	var authType="basic";
-	if(matches!=null)
+  if(authorization === null || typeof authorization === 'undefined')
 	{
-		authType=matches[1].toLowerCase();
+		var authType="token"
+		var authorization="Token invalide";
+		if(this.request.headers.cookie != "")
+		{
+			var match =this.request.headers.cookie.match(/token=(\S*)/);
+			if(!!match[1])
+			{
+				authorization = "Token " + match[1];
+			}
+		}
+	}else
+	{
+		var matches=authorization.match(/^(\w+)\s/);
+		var authType="basic";
+		if(matches!=null)
+		{
+			authType=matches[1].toLowerCase();
+		}
 	}
 	var authenticator=require("./security/"+authType).getInstance();
 	authenticator.auth(authorization,callBack);
@@ -34,7 +49,7 @@ Dispatcher.prototype.dispatch=function(handler)
 	// try
 	// {
 	var handlerPath=config.backend_handlers + "/" + handler.handler.replace(".","/");
-	
+
 
 	var method = this.request.method.toLowerCase();
 	var that=this;
@@ -50,7 +65,7 @@ Dispatcher.prototype.dispatch=function(handler)
 			handlerImpl.response=that.response;
 			resolve();
 		}
-		
+
 	}).then(function(){
 		return new Promise(function(resolve,reject){
 				var authMethod=null;
@@ -76,7 +91,7 @@ Dispatcher.prototype.dispatch=function(handler)
 							else
 							{
 								reject({status : false, message : "Not enough privilege"})
-							}	
+							}
 						}else
 						{
 							reject(passport)
@@ -115,7 +130,7 @@ Dispatcher.prototype.dispatch=function(handler)
 						that.response.writeHead(202,{"Content-Type" : "text/json"});
 					}).apply(handlerImpl);
 				}
-				
+
 				handlerImpl[method].apply(handlerImpl,handler.params);
 			}
 		})
@@ -127,13 +142,13 @@ Dispatcher.prototype.dispatch=function(handler)
 	})
 
 
-		
-
-		
 
 
-		
-		
+
+
+
+
+
 	// }catch(error)
 	// {
 	// 	this.response.writeHeader(500,{"Content-Type" : "text/json"});
