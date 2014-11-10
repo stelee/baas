@@ -9,4 +9,5 @@ exports.routers={
 	,"/public/(.*)"		: "public"
 	,"/mongodb/(.*)"	: "mongodb_proxy"
 	,"/twister/" : "proxy"
+	,"/opencart/(.*)" : "opencart"
 }

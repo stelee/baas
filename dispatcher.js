@@ -55,7 +55,6 @@ Dispatcher.prototype.dispatch=function(handler)
 	var that=this;
 	var handlerImpl
 
-
 	new Promise(function(resolve,reject){
 		handlerImpl=loader.load(handlerPath).getInstance();
 		if(handlerImpl==null){
@@ -130,7 +129,6 @@ Dispatcher.prototype.dispatch=function(handler)
 						that.response.writeHead(202,{"Content-Type" : "text/json"});
 					}).apply(handlerImpl);
 				}
-
 				handlerImpl[method].apply(handlerImpl,handler.params);
 			}
 		})

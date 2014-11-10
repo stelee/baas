@@ -17,6 +17,7 @@
   "dependencies": {
     "http-proxy": "^1.3.0",
     "lingo": "0.0.5",
+    "node-mysql": "^0.4.0",
     "promise": ">=4.0.0",
     "string": "~1.8.1"
   }
