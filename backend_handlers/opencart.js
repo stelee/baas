@@ -39,7 +39,7 @@ OpenCart.prototype.get=function(params)
 		if((!Nil.isNull(openCartModule)) && (methodName in openCartModule))
 		{
 			openCartModule.handlerImpl=that;
-			openCartModule[methodName](args).then(function(data){
+			openCartModule[methodName].apply(openCartModule,args).then(function(data){
 				that.writeToJSON(data);
 			}).catch(function(error){
 				that.writeToJSON({
