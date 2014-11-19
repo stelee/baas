@@ -39,8 +39,9 @@ where p.product_id = ?',
 	'product_image': 'select \
 image from oc_product_image where product_id =? order by sort_order',
 	"get_price_by_id": "select \
-p.product_id as id,p.price as price, pdiscount.price as discount_price, pspecial.price as special_price \
+d.name as `name`,p.quantity as quantity, p.product_id as id,p.price as price, pdiscount.price as discount_price, pspecial.price as special_price \
 from oc_product as p \
+left outer join oc_product_description as d on d.product_id=p.product_id and d.language_id=? \
 left outer join oc_product_discount as pdiscount on pdiscount.product_id = p.product_id and now()>= pdiscount.date_start and now()<= pdiscount.date_end \
 left outer join oc_product_special as pspecial on pspecial.product_id = p.product_id and now()>= pspecial.date_start and now()<= pspecial.date_end \
 where p.product_id=?"
@@ -88,12 +89,14 @@ Products.prototype.listByCategory=function(categoryId,language,recordsPerPage,cu
 	});
 }
 
-Products.prototype.price=function(productId)
+Products.prototype.price=function(productId,language)
 {
+	var language_id=this.getLanguageId(language);
+
 	var sql=SQLCONST['get_price_by_id'];
 	return new Promise(function(resolve,reject){
-		database.query(sql,[productId]).then(function(data){
-			resolve(data);
+		database.query(sql,[language_id,productId]).then(function(data){
+			resolve(data[0]);
 		})
 	});
 }
