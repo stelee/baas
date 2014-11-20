@@ -9,7 +9,7 @@ var OpenCart=function()
 
 mixin(OpenCart,withResponseToJSON);
 
-OpenCart.prototype.get=function(params)
+OpenCart.prototype._dispatch=function(params)
 {
 	var that=this;
 	if(Nil.isEmpty(params))
@@ -56,6 +56,34 @@ OpenCart.prototype.get=function(params)
 			})
 		}
 	}
+}
+
+OpenCart.prototype.post=function(params)
+{
+	var body='';
+	var request=this.request;
+	var that=this;
+	this.http_method='POST'
+	request.on('data',function(data){
+		body+=data;
+
+		//too much POST data, kill the connection
+		if(body.length>1e6)
+		{
+			request.connection.destroy();
+		};
+	});
+	request.on('end',function(){
+		var post=JSON.parse(body);
+		that.post=post;
+		that._dispatch(params);
+	})
+}
+
+OpenCart.prototype.get=function(params)
+{
+	this.http_method='GET'
+	this._dispatch(params);
 }
 
 
