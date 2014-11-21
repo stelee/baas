@@ -1,6 +1,7 @@
 var mysql = require('mysql');
 var Promise=require('Promise');
 var Singleton=require('./singleton');
+var Sequence=require('./utils/sequence').Sequence;
 
 var dbconfig={
 	'host': 'localhost',
@@ -37,6 +38,78 @@ Database.prototype.open=function()
 			that.connected=true;
 		});
 	}
+}
+
+Database.prototype.prepareInsert=function(tableName,data)
+{
+	var q="INSERT INTO " + tableName + "(";
+	var placeHolderForValues="";
+	var comma="";
+	var values=[];
+	for(key in data)
+	{
+		if(data.hasOwnProperty(key))
+		{
+			q+=comma + "`" + key + "`";
+			placeHolderForValues +=comma + "?";
+			comma = ","
+			values.push(data[key]);
+		}
+	}
+	q+=")values(" + placeHolderForValues + ")";
+	return mysql.format(q,values);
+}
+
+Database.prototype.transaction=function(sqls)
+{
+	var that=this;
+	var connection=this.connection;
+	var insertIds=[];
+
+	var startTransaction=function(next,onFailed)
+	{
+		connection.beginTransaction(function(err)
+		{
+			if(err)
+			{
+				onFailed(err);
+			}
+			next();
+		})
+	}
+
+	fnArray=sqls.map(function(sql)
+	{
+		return function(next,onFailed)
+		{
+			connection.query(sql,function(err,result){
+				if(err){
+					connection.rollback(function(){
+						onFailed(err);
+					})
+				}
+				insertIds.push(result.insertId);
+				next();
+			})
+		}
+	})
+
+	return Promise(function(resolve,reject){
+		new Sequence([startTransaction].concat(fnArray),function(){
+			connection.commit(function(err){
+				if(err){
+					connection.rollback(function(){
+						reject(err);
+					})
+				}
+				resolve(insertIds);
+			})
+		},function(err)
+		{
+			reject(err);
+		})
+	})
+
 }
 
 Database.prototype.query=function(query,parameters)

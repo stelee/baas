@@ -21,6 +21,9 @@ Order.prototype.process=function()
 		}else
 		{
 			console.log(post);
+			database.prepareInsert("oc_order",{
+				invoice_no: "0"
+			})
 			resolve({ret:"1"});
 		}
 	});
