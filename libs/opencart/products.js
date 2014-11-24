@@ -39,7 +39,7 @@ where p.product_id = ?',
 	'product_image': 'select \
 image from oc_product_image where product_id =? order by sort_order',
 	"get_price_by_id": "select \
-d.name as `name`,p.quantity as quantity, p.product_id as id,p.price as price, pdiscount.price as discount_price, pspecial.price as special_price \
+d.name as `name`,p.model, p.quantity as quantity, p.product_id as id,p.price as price, pdiscount.price as discount_price, pspecial.price as special_price \
 from oc_product as p \
 left outer join oc_product_description as d on d.product_id=p.product_id and d.language_id=? \
 left outer join oc_product_discount as pdiscount on pdiscount.product_id = p.product_id and now()>= pdiscount.date_start and now()<= pdiscount.date_end \

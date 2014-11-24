@@ -60,6 +60,38 @@ Database.prototype.prepareInsert=function(tableName,data)
 	return mysql.format(q,values);
 }
 
+Database.prototype.openTransaction=function()
+{
+	var that=this;
+	var connection=this.connection;
+	return new Promise(function(resolve,reject){
+		connection.beginTransaction(function(err)
+		{
+			if(err)
+			{
+				reject(err);
+			}
+			resolve();
+		})
+	});
+}
+
+Database.prototype.commit=function()
+{
+	var that=this;
+	var connection=this.connection;
+	return new Promise(function(resolve,reject){
+		connection.commit(function(err)
+		{
+			if(err)
+			{
+				reject(err);
+			}
+			resolve();
+		})
+	});
+}
+
 Database.prototype.transaction=function(sqls)
 {
 	var that=this;
@@ -114,18 +146,49 @@ Database.prototype.transaction=function(sqls)
 
 Database.prototype.query=function(query,parameters)
 {
-	var q=query;
-	if(typeof parameters !='undefined')
-	{
-		q=mysql.format(query,parameters);
-	}
 	var that=this;
-	return new Promise(function(resolve,reject){
-		that.connection.query(q,function(err,rows,fields){
-			//clone the value or use the rows directly?
-			resolve(rows);
+	if(typeof query === "string")
+	{
+		var q=query;
+		if(typeof parameters !='undefined')
+		{
+			q=mysql.format(query,parameters);
+		}
+		return new Promise(function(resolve,reject){
+			that.connection.query(q,function(err,rows,fields){
+				//clone the value or use the rows directly?
+				if(err)
+				{
+					reject(err);
+					return;
+				}
+				resolve(rows);
+			})
+		});
+	}else if("map" in query)
+	{
+		var results=[];
+		var fnArray=query.map(function(sql){
+			return function(next,onErr)
+			{
+				that.connection.query(sql,function(err,result){
+					if(err)
+					{
+						onErr(err);
+						return;
+					};
+					results.push(result);
+					next();
+				});
+			}
 		})
-	});
+		return new Promise(function(resolve,reject){
+			var seq=new Sequence(fnArray,function(){
+				resolve(results);
+			},reject);
+			seq.run();
+		});
+	}	
 }
 
 exports.Database=Database;

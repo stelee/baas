@@ -1,4 +1,4 @@
-var Nil=require('null');
+var Nil=require('./null');
 
 var Sequence=function(fnArray,onFinished,onFailed)
 {
