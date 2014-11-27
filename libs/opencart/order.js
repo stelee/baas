@@ -130,6 +130,7 @@ Order.prototype.process=function(language)
 			}).then(function(){
 				resolve({ret:"1"});
 			}).catch(function(err){
+				database.rollback();
 				reject(err);
 			});
 		}

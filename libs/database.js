@@ -76,6 +76,14 @@ Database.prototype.openTransaction=function()
 	});
 }
 
+
+Database.prototype.rollback=function()
+{
+	var that=this;
+	var connection=this.connection;
+	connection.rollback();
+}
+
 Database.prototype.commit=function()
 {
 	var that=this;
