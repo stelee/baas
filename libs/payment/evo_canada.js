@@ -1,5 +1,7 @@
 var request=require('request');
 var querystring=require('querystring');
+var Promise=require('Promise');
+
 var config=
 {
 	url: "https://secure.evoepay.com/api/transact.php",
@@ -8,7 +10,7 @@ var config=
 	type: "sale"
 }
 var EvoCanada=function(creditCardInfo){
-	this.ags={
+	this.args={
 		url: config.url,
 		form: {
 			username: config.username,
@@ -21,7 +23,7 @@ var EvoCanada=function(creditCardInfo){
 	}
 }
 
-EvoCanada.prototype.pay(orderId,amount)
+EvoCanada.prototype.pay=function(orderId,amount)
 {
 	var that=this;
 
@@ -52,3 +54,5 @@ EvoCanada.prototype.pay(orderId,amount)
 		})
 	})
 }
+
+exports.EvoCanada=EvoCanada;

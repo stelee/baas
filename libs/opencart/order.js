@@ -3,6 +3,11 @@ var database=require("../database").getOnlyInstance();
 var mixin=require('../mixin').mixin;
 var withGetLanguageId=require('../comps/withGetLanguageId');
 var Sequence=require('../utils/sequence').Sequence;
+var dateFormat=require('dateformat');
+
+var EvoCanada=require('../payment/evo_canada').EvoCanada;
+var sendEmail=require('../utils/foodpacker_email').sendEmail;
+
 var Order=function()
 {
 
@@ -17,6 +22,8 @@ Order.prototype.process=function(language)
 
 	var httpMethod=that.handlerImpl.http_method;
 	var post=that.handlerImpl.post;
+	var emailData={};
+	var now=new Date();
 	return new Promise(function(resolve,reject)
 	{
 		if(httpMethod !== 'POST')
@@ -72,6 +79,8 @@ Order.prototype.process=function(language)
 				ip: that.handlerImpl.request.connection.remoteAddress,
 				user_agent: that.handlerImpl.request.headers['user-agent'],
 				accept_language: that.handlerImpl.request.headers['accept-language']
+				,date_added:dateFormat(now,"yyyy-mm-dd h:MM:ss TT")
+				,date_modified:dateFormat(now,"yyyy-mm-dd h:MM:ss TT")
 			});
 			database.openTransaction().then(function(){
 				return database.query(sql);
@@ -125,12 +134,44 @@ Order.prototype.process=function(language)
 				}));
 				return database.query(sqls);
 			})
+			.then(function(){
+				var evo=new EvoCanada({
+					ccnumber: post.card_number,
+					ccexp: post.expiry_month+post.expiry_year,
+					cvv: post.cvv
+				})
+				return evo.pay(that.orderId,post.total + post.shipment);
+			})
+			.then(function(transactionInfo){
+				var sql=database.prepareInsert('oc_payment_evo',{
+					order_id:that.orderId
+					,reference_id:transactionInfo.transactionid
+					,status: transactionInfo.response
+					,description: transactionInfo.responsetext
+					,original_description: JSON.stringify(transactionInfo)
+					,date_added:dateFormat(now,"yyyy-mm-dd h:MM:ss TT")
+					,date_modified:dateFormat(now,"yyyy-mm-dd h:MM:ss TT")
+				})
+				emailData={
+					to: post.email,
+					name: post.receiver,
+					orderid: that.orderId,
+					transactionid: transactionInfo.transactionid
+				}
+				return database.query(sql);
+			})
+			.then(function(){
+				return sendEmail(emailData);
+			})
 			.then(function(result){
 				return database.commit();
-			}).then(function(){
+			})
+			.then(function(){
 				resolve({ret:"1"});
-			}).catch(function(err){
+			})
+			.catch(function(err){
 				database.rollback();
+				console.log(err);
 				reject(err);
 			});
 		}
