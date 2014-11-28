@@ -48,7 +48,8 @@ EvoCanada.prototype.pay=function(orderId,amount)
 			{
 				reject({
 					error: true,
-					msg: ret.responsetext
+					msg: ret.responsetext,
+					transaction: ret
 				});
 			}
 		})

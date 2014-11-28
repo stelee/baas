@@ -4,6 +4,7 @@ var mixin=require('../mixin').mixin;
 var withGetLanguageId=require('../comps/withGetLanguageId');
 var Sequence=require('../utils/sequence').Sequence;
 var dateFormat=require('dateformat');
+var Nil=require('../utils/null');
 
 var EvoCanada=require('../payment/evo_canada').EvoCanada;
 var sendEmail=require('../utils/foodpacker_email').sendEmail;
@@ -171,11 +172,47 @@ Order.prototype.process=function(language)
 			})
 			.catch(function(err){
 				database.rollback();
+				try{
+					that._saveError(that.orderId,err,post);
+				}catch(e)
+				{
+					console.error(e);
+				}
+				
 				console.log(err);
 				reject(err);
 			});
 		}
 	});
+}
+Order.prototype._saveError=function(orderId,err,post)
+{
+	var now=new Date();
+	var transactionInfo={};
+	if(Nil.isNotNull(err.transaction))
+	{
+		transactionInfo=err.transaction;
+
+		var sql=database.prepareInsert('oc_payment_evo',{
+			order_id:orderId
+			,reference_id:transactionInfo.transactionid
+			,status: transactionInfo.response
+			,description: transactionInfo.responsetext
+			,original_description: JSON.stringify(transactionInfo)
+			,date_added:dateFormat(now,"yyyy-mm-dd h:MM:ss TT")
+			,date_modified:dateFormat(now,"yyyy-mm-dd h:MM:ss TT")
+		});
+		database.query(sql);
+	}
+	var emailData={
+					to: post.email,
+					name: post.receiver,
+					orderid: orderId,
+					transactionid: transactionInfo.transactionid,
+					response: transactionInfo.responsetext,
+					type: 'TRANSACTION FAILED'
+				}
+    sendEmail(emailData);
 }
 
 exports.getInstance=function()

@@ -10,5 +10,6 @@ CREATE TABLE `opencart`.`oc_email` (
   `type` VARCHAR(32) NOT NULL DEFAULT 'NOTIFIER',
   `date_added` DATETIME NULL,
   `date_modified` DATETIME NULL,
+  `status` INT NOT NULL DEFAULT 1,
   PRIMARY KEY (`email_id`),
   UNIQUE INDEX `email_id_UNIQUE` (`email_id` ASC));

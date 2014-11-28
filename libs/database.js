@@ -77,11 +77,11 @@ Database.prototype.openTransaction=function()
 }
 
 
-Database.prototype.rollback=function()
+Database.prototype.rollback=function(fn)
 {
 	var that=this;
 	var connection=this.connection;
-	connection.rollback();
+	connection.rollback(fn);
 }
 
 Database.prototype.commit=function()
