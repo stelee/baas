@@ -1,8 +1,19 @@
-<img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;">
+<a href='javascript:void(0)' onclick='javascript:submitPayment(this)'><img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;">
+<form class="leesoft-paypal-checkout-form" target="paymentWindow" method="post">
+	<input type='hidden' name='amount' value='10'/>
+	<input type='hidden' name='currency' value='CAD'/>
+	<input type='hidden' name='gateway' value='paypal'/>
+	<input type='hidden' name='orderId' value='1111'>
+	<input type="hidden" name="description" value="Pay for the item blah blah blah...">
+</form>
+</a>
 <script language='javascript'>
-	var auth={
-		USER:"sdk-three_api1.sdk.com",
-		PWD:"QFZCWN5HZM8VBG7Q",
-		SIGNATURE: "A-IzJhZZjhg29XQ2qnhapuwxIDzyAZQ92FRP5dqBzVesOkzbdUONzmOU"
+	var gateway='/payment/';
+	var submitPayment=function(linker)
+	{
+		var form=linker.querySelector('.leesoft-paypal-checkout-form');
+		form.setAttribute("action",gateway);
+		form.submit();
+		event.preventDefault();
 	}
 </script>

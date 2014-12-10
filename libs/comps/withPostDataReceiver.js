@@ -4,6 +4,11 @@ module.exports={
 		var body="";
 		this.request.addListener('data',function(chunk){
 			body += chunk;
+			if(body.length>1e6)
+			{
+				that.request.connection.destroy();
+				onError("out of memory");
+			};
 		});
 		this.request.addListener("error",function(error){
 			onError(error);

@@ -1,6 +1,6 @@
 var request=require('request');
 var querystring=require('querystring');
-var Promise=require('Promise');
+var Promise=require('promise');
 
 var config=
 {
@@ -57,3 +57,7 @@ EvoCanada.prototype.pay=function(orderId,amount)
 }
 
 exports.EvoCanada=EvoCanada;
+
+exports.getInstance=function(){
+	return new EvoCanada();
+}
